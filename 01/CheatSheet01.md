@@ -1,45 +1,56 @@
-📄 Cheat Sheet: SuperCollider - Sesión 1
-Conceptos básicos, atajos y sintaxis para sobrevivir (y hacer ruido) en el primer día.
+# Cheat Sheet: Sesión 1
 
-⌨️ 1. Atajos de Teclado Esenciales (¡Tu salvavidas!)
-Encender el Servidor: Ctrl + B (Windows/Linux) o Cmd + B (Mac). También puedes escribir s.boot;
+> Conceptos básicos, atajos y sintaxis para sobrevivir (y hacer ruido) en el primer día.
 
-Evaluar Código (Ejecutar): Shift + Enter (evalúa una línea) o Ctrl/Cmd + Enter (evalúa un bloque completo entre paréntesis).
+---
 
-🚨 ¡DETENER TODO EL SONIDO!: Ctrl + . o Cmd + . (Control + Punto). Apréndete este atajo, lo usarás mucho.
+## 1. Atajos de Teclado Esenciales
 
-Limpiar la consola (Post Window): Ctrl/Cmd + Shift + P.
+| Acción | Windows/Linux | Mac |
+|---|---|---|
+| **Encender el servidor** | `Ctrl + B` | `Cmd + B` |
+| **Evaluar línea** | `Shift + Enter` | `Shift + Enter` |
+| **Evaluar bloque** | `Ctrl + Enter` | `Cmd + Enter` |
+| **DETENER TODO EL SONIDO** | `Ctrl + .` | `Cmd + .` |
+| **Limpiar consola** | `Ctrl + Shift + P` | `Cmd + Shift + P` |
+| **Abrir documentación** | `Ctrl + D` | `Cmd + D` |
 
-🧠 2. Conceptos Clave del Entorno
-Cliente (sclang): Es el editor de texto donde escribimos nuestro código. Es el "cerebro".
+> También puedes encender el servidor escribiendo `s.boot;`
 
-Servidor (scsynth o s): Es el motor de audio. Es el "músculo" que genera el sonido. ¡No hay sonido si el servidor no está encendido!
+---
 
-UGen (Unit Generator): Son las piezas de lego de SuperCollider. Osciladores (SinOsc), filtros, ruido (WhiteNoise), etc.
+## 2. Conceptos Clave del Entorno
 
-.ar (Audio Rate): Se usa en los UGens que generan sonido audible (alta resolución, usualmente 44100 valores por segundo).
+- **Cliente (`sclang`)**: Es el editor de texto donde escribimos nuestro código. Es el "cerebro".
+- **Servidor (`scsynth` o `s`)**: Es el motor de audio. Es el "músculo" que genera el sonido. ¡No hay sonido si el servidor no está encendido!
+- **UGen (Unit Generator)**: Son las piezas de lego de SuperCollider. Osciladores (`SinOsc`), filtros, ruido (`WhiteNoise`), etc.
+- **`.ar` (Audio Rate)**: Se usa en los UGens que generan sonido audible (alta resolución, usualmente 44100 valores por segundo).
+- **`.kr` (Control Rate)**: Se usa en los UGens que generan señales de control (como LFOs o moduladores). Usan menos recursos de tu computadora.
 
-.kr (Control Rate): Se usa en los UGens que generan señales de control (como LFOs o moduladores). Usan menos recursos de tu computadora.
+---
 
-🔤 3. Sintaxis y Reglas Básicas
-Punto y coma (;): Todas las instrucciones en SuperCollider deben terminar con un punto y coma.
+## 3. Sintaxis y Reglas Básicas
 
-Comentarios: El código que la computadora ignora. Se usa para tomar notas.
+- **Punto y coma (`;`)**: Todas las instrucciones en SuperCollider deben terminar con un punto y coma.
+- **Comentarios**: El código que la computadora ignora. Se usa para tomar notas.
 
+```supercollider
 // Comentario de una sola línea
 
-/_ Comentario de múltiples líneas _/
+/* Comentario de múltiples líneas */
+```
 
-Mensajes y Métodos: Se escriben como objeto.mensaje. Ej: s.boot; (al servidor s le decimos que arranque boot).
+- **Mensajes y Métodos**: Se escriben como `objeto.mensaje`. Ej: `s.boot;` (al servidor `s` le decimos que arranque `boot`).
+- **Variables Globales**: Llevan una tilde `~` al principio. Viven para siempre mientras SC esté abierto. Ej: `~miFrecuencia = 440;`
+- **Variables Locales**: Se declaran con la palabra `var`. Solo viven dentro de un bloque de código `{ }` o `( )`. Ej: `var volumen = 0.5;`
 
-Variables Globales: Llevan una tilde ~ al principio. Viven para siempre mientras SC esté abierto. Ej: ~miFrecuencia = 440;
+---
 
-Variables Locales: Se declaran con la palabra var. Solo viven dentro de un bloque de código { } o ( ). Ej: var volumen = 0.5;
+## 4. Nuestra primera onda (Generando Sonido)
 
-🔊 4. Nuestra primera onda (Generando Sonido)
-La forma más rápida de probar un sonido es envolver un UGen entre llaves { } y decirle .play.
+La forma más rápida de probar un sonido es envolver un UGen entre llaves `{ }` y decirle `.play`.
 
-Supercollider
+```supercollider
 // Estructura básica de un oscilador
 { SinOsc.ar(freq, phase, mul) }.play;
 
@@ -47,17 +58,22 @@ Supercollider
 { SinOsc.ar(440, 0, 0.1) }.play;
 // 440 = Frecuencia (Hz)
 // 0 = Fase
-// 0.1 = Volumen (mul). ⚠️ ¡NUNCA USES 1.0 PARA EMPEZAR!
-🎹 5. SynthDef: La Receta Profesional
-Para hacer música o arte sonoro en serio, no usamos {}.play, sino que creamos recetas de sintetizadores (SynthDef) y luego los invocamos (Synth).
+// 0.1 = Volumen (mul). ¡NUNCA USES 1.0 PARA EMPEZAR!
+```
 
-Paso A: Crear la receta y guardarla en el servidor (.add)
+---
 
-Supercollider
+## 5. SynthDef: La Receta Profesional
+
+Para hacer música o arte sonoro en serio, no usamos `{}.play`, sino que creamos recetas de sintetizadores (`SynthDef`) y luego los invocamos (`Synth`).
+
+**Paso A:** Crear la receta y guardarla en el servidor (`.add`)
+
+```supercollider
 (
 SynthDef(\mi_sinte, {
-// 1. Argumentos (lo que podré cambiar en vivo)
-arg freq = 440, amp = 0.2;
+    // 1. Argumentos (lo que podré cambiar en vivo)
+    arg freq = 440, amp = 0.2;
 
     // 2. Variables (nuestros cables internos)
     var señal;
@@ -70,9 +86,11 @@ arg freq = 440, amp = 0.2;
 
 }).add;
 )
-Paso B: Usar la receta en vivo
+```
 
-Supercollider
+**Paso B:** Usar la receta en vivo
+
+```supercollider
 // Crear un sonido usando nuestra receta
 x = Synth(\mi_sinte);
 
@@ -82,9 +100,13 @@ x.set(\amp, 0.5);
 
 // Apagar este sonido específico
 x.free;
-🎛️ 6. Tipos de Modulación Básica
-AM (Amplitud): Cambiamos el volumen de un sonido usando otro sonido. Crea efectos de trémolo. (Matemáticamente: se multiplica \*).
+```
 
-FM (Frecuencia): Cambiamos la afinación de un sonido usando otro sonido. Crea vibratos o timbres metálicos y complejos. (Matemáticamente: se suma + al argumento de frecuencia).
+---
 
-💡 Consejo de Oro: Si alguna vez te pierdes con un UGen, haz clic sobre la palabra (ej: SinOsc) y presiona Ctrl/Cmd + D para abrir la documentación oficial con ejemplos.
+## 6. Tipos de Modulación Básica
+
+- **AM (Amplitud)**: Cambiamos el volumen de un sonido usando otro sonido. Crea efectos de trémolo. (Matemáticamente: se multiplica `*`).
+- **FM (Frecuencia)**: Cambiamos la afinación de un sonido usando otro sonido. Crea vibratos o timbres metálicos y complejos. (Matemáticamente: se suma `+` al argumento de frecuencia).
+
+> **Consejo de Oro:** Si alguna vez te pierdes con un UGen, haz clic sobre la palabra (ej: `SinOsc`) y presiona `Ctrl/Cmd + D` para abrir la documentación oficial con ejemplos.
